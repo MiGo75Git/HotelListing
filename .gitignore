@@ -1,3 +1,4 @@
 .vs
 /HotelListing.API/obj
 /HotelListing.API/bin/Debug/net6.0
+/HotelListing.API/logs
