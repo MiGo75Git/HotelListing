@@ -56,7 +56,7 @@ namespace HotelListing.API.Controllers
         //Attribut ! pomembno opisuje akcijo na API - prejme parameter int
         [HttpGet("{id}")]
         // Vrne ActionResult in objekt <Country>,Metoda GetCountry(id)
-        public async Task<ActionResult<Country>> GetCountry(int id)
+        public async Task<ActionResult<CountryDTO>> GetCountry(int id)
         {
             // preverjanje ali imamo tabelo oziroma podatke ?
             if (_context.Countries == null)
@@ -64,17 +64,21 @@ namespace HotelListing.API.Controllers
                 return NotFound();
             }
             // FindAsync na tabeli s pomočjo EF oziroma ORM principi
-            // select * from Countries where id={id} in asihrono poiščemo ter vrnemo
-            var country = await _context.Countries.FindAsync(id);
-            
+            // pribl.kot SELECT c.*, h.* FROM Countries AS c INNER JOIN Hotels AS h ON c.Id = h.CountryId WHERE (c.Id = id)
+            // in asihrono poiščemo ter vrnemo
+            var country = await _context.Countries.Include(q => q.Hotels).FirstOrDefaultAsync(q => q.Id == id);
+
             // Če ne najdemo ustreznega zapisa vrnemo 404 Not Found
             if (country == null)
             {
                 // return 404
                 return NotFound();
             }
+            // Mapiranje podatkov v CountryDTO
+            var CountryDto = _mapper.Map<CountryDTO>(country);
+
             // pripravljeno kodo še obdamo z OK ObjectResult objectom, be explicit
-            return Ok(country);
+            return Ok(CountryDto);
         }
 
         // PUT: api/Countries/5
