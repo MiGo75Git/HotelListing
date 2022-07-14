@@ -33,7 +33,7 @@ namespace HotelListing.API.Controllers
         //Attribut ! pomembno opisuje akcijo na API
         [HttpGet]
         // Vrne ActionResult in objekt IEnumerable<Country>,Metoda GetCountries
-        public async Task<ActionResult<IEnumerable<Country>>> GetCountries()
+        public async Task<ActionResult<IEnumerable<GetCountryDTO>>> GetCountries()
         {
             // preverjanje ali imamo tabelo oziroma podatke ?
             if (_context.Countries == null)
@@ -42,9 +42,13 @@ namespace HotelListing.API.Controllers
               return NotFound();
             }
             // select * from Countries in asihrono preberemo ter vrnemo
-            // pripravljeno kodo še obdamo z OK ObjectResult objectom, be explicit
             var countries = await _context.Countries.ToListAsync();
-            return Ok(countries);
+
+            // automapper maping List<countries> to List<GetCountryDTO>
+            var records = _mapper.Map<List<GetCountryDTO>>(countries);
+
+            // pripravljeno kodo še obdamo z OK ObjectResult objectom, be explicit
+            return Ok(records);
         }
 
         // GET: api/Countries/5
