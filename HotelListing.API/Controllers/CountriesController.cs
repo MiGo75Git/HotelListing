@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HotelListing.API.Data;
+using HotelListing.API.Models.Country;
 
 namespace HotelListing.API.Controllers
 {
@@ -114,18 +115,24 @@ namespace HotelListing.API.Controllers
         }
 
         // POST: api/Countries
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-
         //Attribut ! pomembno opisuje akcijo na API
         [HttpPost]
-        // Vrne ActionResult in objekt Country,Metoda PostCountry s parametrom Country
-        public async Task<ActionResult<Country>> PostCountry(Country country)
+        // Vrne ActionResult in objekt Country,Metoda PostCountry s parametrom CreateCountryDTO
+        public async Task<ActionResult<Country>> PostCountry(CreateCountryDTO createCountry)
         {
           // preverjanje ali imamo tabelo ?
           if (_context.Countries == null)
           {
               return Problem("Entity set 'HotelListingDbContext.Countries'  is null.");
           }
+            //kreiranje objekta za DB iz DTO
+            var country = new Country
+            {
+                //ročno premapiranje 
+                Name = createCountry.Name,
+                ShortName = createCountry.ShortName,
+            };
+            
             // dodamo zapis 
             _context.Countries.Add(country);
 
