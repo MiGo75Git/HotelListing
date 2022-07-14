@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HotelListing.API.Data;
 using HotelListing.API.Models.Country;
+using AutoMapper;
 
 namespace HotelListing.API.Controllers
 {
@@ -16,11 +17,15 @@ namespace HotelListing.API.Controllers
     {
         // _context represents a copy of our database DB Context
         private readonly HotelListingDbContext _context;
+        
+        // IMapper context 
+        private readonly IMapper _mapper;
 
         // DB context into class with Dependecy Injection from App 
-        public CountriesController(HotelListingDbContext context)
+        public CountriesController(HotelListingDbContext context, IMapper mapper)
         {
             _context = context;
+            this._mapper = mapper;
         }
 
         // GET: api/Countries
@@ -125,13 +130,8 @@ namespace HotelListing.API.Controllers
           {
               return Problem("Entity set 'HotelListingDbContext.Countries'  is null.");
           }
-            //kreiranje objekta za DB iz DTO
-            var country = new Country
-            {
-                //ročno premapiranje 
-                Name = createCountry.Name,
-                ShortName = createCountry.ShortName,
-            };
+            //kreiranje objekta za DB iz DTO with AutoMapper
+            var country = _mapper.Map<Country>(createCountry);
             
             // dodamo zapis 
             _context.Countries.Add(country);
