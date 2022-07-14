@@ -87,9 +87,9 @@ namespace HotelListing.API.Controllers
         //Attribut ! pomembno opisuje akcijo na API - prejme parameter int
         [HttpPut("{id}")]
         // Vrne ActionResult 
-        public async Task<IActionResult> PutCountry(int id, Country country)
+        public async Task<IActionResult> PutCountry(int id, UpdateCountryDTO updateCountryDTO)
         {
-            if (id != country.Id)
+            if (id != updateCountryDTO.Id)
             {
                 // return 404
                 return BadRequest("Invalid record Id");
@@ -99,8 +99,18 @@ namespace HotelListing.API.Controllers
             // An entity state determines is it being added.So whenever we do a post and
             // we say add it, change the state of this to entity, state and so on,
             // here we are saying that we are Modifiying entity 
-            _context.Entry(country).State = EntityState.Modified;
+            // _context.Entry(country).State = EntityState.Modified;
             
+            // Read current county in DB 
+            var country = await _context.Countries.FindAsync(id);
+            if (country == null)
+            {
+                // return 404
+                return NotFound();
+            }
+            // Mapping DTO to EF object
+            _mapper.Map(updateCountryDTO, country);
+
             // So we're just doing I try catch because if maybe two separate user state did
             // the same record at different intervals this this is there to catch like any
             // stale data that are still update that might be attempted so that is why all
