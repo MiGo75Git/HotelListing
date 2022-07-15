@@ -16,7 +16,7 @@ namespace HotelListing.API.Controllers
         private readonly ICountriesRepository _countriesRepository;
 
         // countriesRepository Injection from App 
-        public CountriesController(IMapper mapper,ICountriesRepository countriesRepository)
+        public CountriesController(IMapper mapper, ICountriesRepository countriesRepository)
         {
             this._mapper = mapper;
             _countriesRepository = countriesRepository;
@@ -102,8 +102,6 @@ namespace HotelListing.API.Controllers
         }
 
         // PUT: api/Countries/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-
         //Attribut ! pomembno opisuje akcijo na API - prejme parameter int
         [HttpPut("{id}")]
         // Vrne ActionResult 
@@ -197,7 +195,7 @@ namespace HotelListing.API.Controllers
                 return NotFound();
             }
 
-            await _countriesRepository.DeleteAsync(country.Id);            
+            await _countriesRepository.DeleteAsync(country.Id);
             // return 204
             return NoContent();
         }
