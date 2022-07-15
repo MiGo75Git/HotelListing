@@ -75,6 +75,32 @@ namespace HotelListing.API.Controllers
             return Ok(CountryDto);
         }
 
+        //Attribut ! pomembno opisuje akcijo na API - prejme parameter int
+        [HttpGet("{id}/details/")]
+        // Vrne ActionResult in objekt <Country>,Metoda GetCountryDetails(id)
+        public async Task<ActionResult<CountryDTO>> GetCountryDetails(int id)
+        {
+            // preverjanje ali imamo tabelo oziroma podatke ?
+            if (_countriesRepository == null)
+            {
+                return NotFound();
+            }
+            // in asihrono poiščemo ter vrnemo v Repositoryu
+            var country = await _countriesRepository.GetDetails(id);
+
+            // Če ne najdemo ustreznega zapisa vrnemo 404 Not Found
+            if (country == null)
+            {
+                // return 404
+                return NotFound();
+            }
+            // Mapiranje podatkov v CountryDTO
+            var CountryDto = _mapper.Map<CountryDTO>(country);
+
+            // pripravljeno kodo še obdamo z OK ObjectResult objectom, be explicit
+            return Ok(CountryDto);
+        }
+
         // PUT: api/Countries/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
 
