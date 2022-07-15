@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HotelListing.API.Contracts;
 using HotelListing.API.Data;
 using HotelListing.API.Models.Country;
 using Microsoft.AspNetCore.Mvc;
@@ -10,17 +11,15 @@ namespace HotelListing.API.Controllers
     [ApiController]
     public class CountriesController : ControllerBase
     {
-        // _context represents a copy of our database DB Context
-        private readonly HotelListingDbContext _context;
-
-        // IMapper context 
+        // IMapper service 
         private readonly IMapper _mapper;
+        private readonly ICountriesRepository _countriesRepository;
 
-        // DB context into class with Dependecy Injection from App 
-        public CountriesController(HotelListingDbContext context, IMapper mapper)
+        // countriesRepository Injection from App 
+        public CountriesController(IMapper mapper,ICountriesRepository countriesRepository)
         {
-            _context = context;
             this._mapper = mapper;
+            _countriesRepository = countriesRepository;
         }
 
         // GET: api/Countries
@@ -31,13 +30,13 @@ namespace HotelListing.API.Controllers
         public async Task<ActionResult<IEnumerable<GetCountryDTO>>> GetCountries()
         {
             // preverjanje ali imamo tabelo oziroma podatke ?
-            if (_context.Countries == null)
+            if (_countriesRepository == null)
             {
                 // return 404
                 return NotFound();
             }
             // select * from Countries in asihrono preberemo ter vrnemo
-            var countries = await _context.Countries.ToListAsync();
+            var countries = await _countriesRepository.GetAllAsync();
 
             // automapper maping List<countries> to List<GetCountryDTO>
             var records = _mapper.Map<List<GetCountryDTO>>(countries);
@@ -54,14 +53,14 @@ namespace HotelListing.API.Controllers
         public async Task<ActionResult<CountryDTO>> GetCountry(int id)
         {
             // preverjanje ali imamo tabelo oziroma podatke ?
-            if (_context.Countries == null)
+            if (_countriesRepository == null)
             {
                 return NotFound();
             }
             // FindAsync na tabeli s pomočjo EF oziroma ORM principi
             // pribl.kot SELECT c.*, h.* FROM Countries AS c INNER JOIN Hotels AS h ON c.Id = h.CountryId WHERE (c.Id = id)
             // in asihrono poiščemo ter vrnemo
-            var country = await _context.Countries.Include(q => q.Hotels).FirstOrDefaultAsync(q => q.Id == id);
+            var country = await _countriesRepository.GetAsync(id);
 
             // Če ne najdemo ustreznega zapisa vrnemo 404 Not Found
             if (country == null)
@@ -97,7 +96,7 @@ namespace HotelListing.API.Controllers
             // _context.Entry(country).State = EntityState.Modified;
 
             // Read current county in DB 
-            var country = await _context.Countries.FindAsync(id);
+            var country = await _countriesRepository.GetAsync(id);
             if (country == null)
             {
                 // return 404
@@ -113,11 +112,11 @@ namespace HotelListing.API.Controllers
             try
             {
                 // pushamo spremembe na DB 
-                await _context.SaveChangesAsync();
+                await _countriesRepository.UpdateAsync(country);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CountryExists(id))
+                if (!await CountryExists(id))
                 {
                     // return 404
                     return NotFound();
@@ -139,18 +138,15 @@ namespace HotelListing.API.Controllers
         public async Task<ActionResult<Country>> PostCountry(CreateCountryDTO createCountry)
         {
             // preverjanje ali imamo tabelo ?
-            if (_context.Countries == null)
+            if (_countriesRepository == null)
             {
                 return Problem("Entity set 'HotelListingDbContext.Countries'  is null.");
             }
             //kreiranje objekta za DB iz DTO with AutoMapper
             var country = _mapper.Map<Country>(createCountry);
 
-            // dodamo zapis 
-            _context.Countries.Add(country);
-
-            // in ga asihrono zapišemo
-            await _context.SaveChangesAsync();
+            // dodamo zapis in repository ga tudi shrani
+            await _countriesRepository.AddAsync(country);
 
             // vrne status code 201 Created
             return CreatedAtAction("GetCountry", new { id = country.Id }, country);
@@ -163,27 +159,26 @@ namespace HotelListing.API.Controllers
         // Vrne ActionResult 
         public async Task<IActionResult> DeleteCountry(int id)
         {
-            if (_context.Countries == null)
+            if (_countriesRepository == null)
             {
                 // return 404
                 return NotFound();
             }
-            var country = await _context.Countries.FindAsync(id);
+            var country = await _countriesRepository.GetAsync(id);
             if (country == null)
             {
                 // return 404
                 return NotFound();
             }
 
-            _context.Countries.Remove(country);
-            await _context.SaveChangesAsync();
+            await _countriesRepository.DeleteAsync(country.Id);            
             // return 204
             return NoContent();
         }
 
-        private bool CountryExists(int id)
+        private async Task<bool> CountryExists(int id)
         {
-            return (_context.Countries?.Any(e => e.Id == id)).GetValueOrDefault();
+            return await (_countriesRepository.Exists(id));
         }
     }
 }
