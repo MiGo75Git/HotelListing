@@ -1,7 +1,7 @@
+using HotelListing.API.Configurations;
+using HotelListing.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using HotelListing.API.Data;
-using HotelListing.API.Configurations;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +19,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(options => {
+builder.Services.AddCors(options =>
+{
     options.AddPolicy("AllowAll", b => b.AllowAnyHeader()
                                         .AllowAnyOrigin()
                                         .AllowAnyMethod());

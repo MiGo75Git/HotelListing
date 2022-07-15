@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
 using HotelListing.API.Data;
 using HotelListing.API.Models.Country;
-using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.API.Controllers
 {
@@ -17,7 +12,7 @@ namespace HotelListing.API.Controllers
     {
         // _context represents a copy of our database DB Context
         private readonly HotelListingDbContext _context;
-        
+
         // IMapper context 
         private readonly IMapper _mapper;
 
@@ -38,8 +33,8 @@ namespace HotelListing.API.Controllers
             // preverjanje ali imamo tabelo oziroma podatke ?
             if (_context.Countries == null)
             {
-              // return 404
-              return NotFound();
+                // return 404
+                return NotFound();
             }
             // select * from Countries in asihrono preberemo ter vrnemo
             var countries = await _context.Countries.ToListAsync();
@@ -100,7 +95,7 @@ namespace HotelListing.API.Controllers
             // we say add it, change the state of this to entity, state and so on,
             // here we are saying that we are Modifiying entity 
             // _context.Entry(country).State = EntityState.Modified;
-            
+
             // Read current county in DB 
             var country = await _context.Countries.FindAsync(id);
             if (country == null)
@@ -143,20 +138,20 @@ namespace HotelListing.API.Controllers
         // Vrne ActionResult in objekt Country,Metoda PostCountry s parametrom CreateCountryDTO
         public async Task<ActionResult<Country>> PostCountry(CreateCountryDTO createCountry)
         {
-          // preverjanje ali imamo tabelo ?
-          if (_context.Countries == null)
-          {
-              return Problem("Entity set 'HotelListingDbContext.Countries'  is null.");
-          }
+            // preverjanje ali imamo tabelo ?
+            if (_context.Countries == null)
+            {
+                return Problem("Entity set 'HotelListingDbContext.Countries'  is null.");
+            }
             //kreiranje objekta za DB iz DTO with AutoMapper
             var country = _mapper.Map<Country>(createCountry);
-            
+
             // dodamo zapis 
             _context.Countries.Add(country);
 
             // in ga asihrono zapišemo
             await _context.SaveChangesAsync();
-            
+
             // vrne status code 201 Created
             return CreatedAtAction("GetCountry", new { id = country.Id }, country);
         }
