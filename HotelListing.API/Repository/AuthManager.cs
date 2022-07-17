@@ -14,11 +14,29 @@ namespace HotelListing.API.Repository
     {
         private readonly IMapper _mapper;
         private readonly UserManager<ApiUser> _userManager;
+
         private readonly IConfiguration _configuration;
         private ApiUser _user;
 
-        private const string _loginProvider = "HotelListAPI";
+        private const string _loginProvider = "HotelListingApi";
         private const string _refreshToken = "RefreshToken";
+
+        public AuthManager(IMapper mapper, UserManager<ApiUser> userManager, IConfiguration configuration)
+        {
+            _mapper = mapper;
+            _userManager = userManager;
+            _configuration = configuration;
+        }
+
+
+        public async Task<string> CreateRefreshToken()
+        {
+            await _userManager.RemoveAuthenticationTokenAsync(_user, _loginProvider, _refreshToken);
+            var newRefreshedToken = await _userManager.GenerateUserTokenAsync(_user, _loginProvider, _refreshToken);
+            var result = await _userManager.SetAuthenticationTokenAsync(_user, _loginProvider, _refreshToken, newRefreshedToken);
+            return newRefreshedToken;
+        }
+
 
         public async Task<AuthResponseDTO> VerifyRefreshToken(AuthResponseDTO request)
         {
@@ -49,21 +67,6 @@ namespace HotelListing.API.Repository
             
         }
 
-        public async Task<string> CreateRefreshToken()
-        {
-            await _userManager.RemoveAuthenticationTokenAsync(_user, _loginProvider, _refreshToken);
-            var newRefreshedToken = await _userManager.GenerateUserTokenAsync(_user, _loginProvider, _refreshToken);
-            var result = await _userManager.SetAuthenticationTokenAsync(_user, _loginProvider, _refreshToken, newRefreshedToken);
-            return newRefreshedToken;
-        }
-
-
-        public AuthManager(IMapper mapper, UserManager<ApiUser> userManager, IConfiguration configuration)
-        {
-            _mapper = mapper;
-            _userManager = userManager;
-            _configuration = configuration;
-        }
 
         public async Task<AuthResponseDTO> Login(LoginDTO loginDto)
         {
