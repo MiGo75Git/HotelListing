@@ -17,6 +17,47 @@ namespace HotelListing.API.Repository
         private readonly IConfiguration _configuration;
         private ApiUser _user;
 
+        private const string _loginProvider = "HotelListAPI";
+        private const string _refreshToken = "RefreshToken";
+
+        public async Task<AuthResponseDTO> VerifyRefreshToken(AuthResponseDTO request)
+        {
+            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            var tokenContent = jwtSecurityTokenHandler.ReadJwtToken(request.Token);
+            var username = tokenContent.Claims.ToList().FirstOrDefault(q => q.Type == ClaimTypes.Email)?.Value;
+            _user = await _userManager.FindByNameAsync(username);
+
+            if (_user == null || _user.Id != request.UserId)
+            {
+                return null;
+            }
+
+            var isValidRefreshToken = await _userManager.VerifyUserTokenAsync(_user, _loginProvider, _refreshToken, request.RefreshToken);
+
+            if (!isValidRefreshToken)
+            {
+                var token = await GenerateToken();
+                return new AuthResponseDTO
+                {
+                    Token = token,
+                    UserId = _user.Id,
+                    RefreshToken = await CreateRefreshToken()
+                };
+            }
+            await _userManager.UpdateSecurityStampAsync(_user);
+            return null;
+            
+        }
+
+        public async Task<string> CreateRefreshToken()
+        {
+            await _userManager.RemoveAuthenticationTokenAsync(_user, _loginProvider, _refreshToken);
+            var newRefreshedToken = await _userManager.GenerateUserTokenAsync(_user, _loginProvider, _refreshToken);
+            var result = await _userManager.SetAuthenticationTokenAsync(_user, _loginProvider, _refreshToken, newRefreshedToken);
+            return newRefreshedToken;
+        }
+
+
         public AuthManager(IMapper mapper, UserManager<ApiUser> userManager, IConfiguration configuration)
         {
             _mapper = mapper;
@@ -33,12 +74,12 @@ namespace HotelListing.API.Repository
             {
                 return null;
             }
-            var token = await GenerateToken(_user);
+            var token = await GenerateToken();
 
             return new AuthResponseDTO
-                {
-                    Token = token,
-                    UserId = _user.Id
+                {   Token = token,
+                    UserId = _user.Id,
+                    RefreshToken = await CreateRefreshToken()
                 };
         }
 
