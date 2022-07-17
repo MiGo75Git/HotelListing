@@ -2,6 +2,7 @@
 using HotelListing.API.Contracts;
 using HotelListing.API.Data;
 using HotelListing.API.Models.Hotel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,7 @@ namespace HotelListing.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class HotelsController : ControllerBase
     {
         // IMapper service 
@@ -56,6 +58,7 @@ namespace HotelListing.API.Controllers
 
         // PUT: api/Hotels/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> PutHotel(int id, UpdateHotelDTO updateHotelDTO)
         {
             if (id != updateHotelDTO.Id)
@@ -93,6 +96,7 @@ namespace HotelListing.API.Controllers
 
         // POST: api/Hotels
         [HttpPost]
+        [Authorize(Roles = "User")]
         public async Task<ActionResult<Hotel>> PostHotel(CreateHotelDTO createHotelDTO)
         {
             if (_hotelsRepository == null)
@@ -107,6 +111,7 @@ namespace HotelListing.API.Controllers
 
         // DELETE: api/Hotels/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteHotel(int id)
         {
             if (_hotelsRepository == null)

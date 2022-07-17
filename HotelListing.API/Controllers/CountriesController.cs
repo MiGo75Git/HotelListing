@@ -2,6 +2,7 @@
 using HotelListing.API.Contracts;
 using HotelListing.API.Data;
 using HotelListing.API.Models.Country;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -104,6 +105,7 @@ namespace HotelListing.API.Controllers
         // PUT: api/Countries/5
         //Attribut ! pomembno opisuje akcijo na API - prejme parameter int
         [HttpPut("{id}")]
+        [Authorize]
         // Vrne ActionResult 
         public async Task<IActionResult> PutCountry(int id, UpdateCountryDTO updateCountryDTO)
         {
@@ -158,6 +160,7 @@ namespace HotelListing.API.Controllers
         // POST: api/Countries
         //Attribut ! pomembno opisuje akcijo na API
         [HttpPost]
+        [Authorize]
         // Vrne ActionResult in objekt Country,Metoda PostCountry s parametrom CreateCountryDTO
         public async Task<ActionResult<Country>> PostCountry(CreateCountryDTO createCountry)
         {
@@ -180,6 +183,7 @@ namespace HotelListing.API.Controllers
 
         //Attribut ! pomembno opisuje akcijo na API - prejme parameter int
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrator")]
         // Vrne ActionResult 
         public async Task<IActionResult> DeleteCountry(int id)
         {

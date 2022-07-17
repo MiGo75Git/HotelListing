@@ -1,5 +1,6 @@
 ﻿using HotelListing.API.Contracts;
 using HotelListing.API.Models.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -54,5 +55,26 @@ namespace HotelListing.API.Controllers
             return Ok();
         }
 
+        // POST: api/Account/register/role
+        [HttpPost]
+        [Route("register/role")]
+        [Authorize(Roles = "Administrator")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> RegisterRole([FromBody] ApiUserRoleDTO apiUserDto)
+        {
+            var errors = await _authManager.RegisterRole(apiUserDto);
+
+            if (errors.Any())
+            {
+                foreach (var error in errors)
+                {
+                    ModelState.AddModelError(error.Code, error.Description);
+                }
+                return BadRequest(ModelState);
+            }
+            return Ok();
+        }
     }
 }
