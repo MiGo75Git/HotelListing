@@ -36,11 +36,12 @@ namespace HotelListing.API.Controllers
                     _logger.LogWarning($"{nameof(RefreshToken)} for user:{request.UserId} failed with as Unauthorized.");
                     return Unauthorized();
                 }
+                _logger.LogInformation($"{nameof(RefreshToken)} for user:{request.UserId} ended succesfull.");
                 return Ok(authResponse);
             }
             catch (Exception ex)
             {
-                _logger.LogInformation($"{nameof(RefreshToken)} went wrong with error {ex.Message}.");
+                _logger.LogError($"{nameof(RefreshToken)} went wrong with error {ex.Message}.");
                 return Problem($"Something went wrong in the {nameof(RefreshToken)}", statusCode: 500);
             }
         }
@@ -98,7 +99,7 @@ namespace HotelListing.API.Controllers
                     {
                         ModelState.AddModelError(error.Code, error.Description);
                     }
-                    _logger.LogWarning($"{nameof(Register)} from user:{apiUserDto.Email} failed with as Unauthorized.");
+                    _logger.LogError($"{nameof(Register)} from user:{apiUserDto.Email} failed with as Unauthorized.");
                     return BadRequest(ModelState);
                 }
                 _logger.LogInformation($"{nameof(Register)} from user:{apiUserDto.Email} succes.");
@@ -106,7 +107,7 @@ namespace HotelListing.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogInformation($"{nameof(Register)} went wrong with error {ex.Message}.");
+                _logger.LogError($"{nameof(Register)} went wrong with error {ex.Message}.");
                 return Problem($"Something went wrong in the {nameof(Register)}", statusCode: 500);
             }
 
