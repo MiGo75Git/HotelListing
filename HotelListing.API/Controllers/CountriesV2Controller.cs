@@ -9,18 +9,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [ApiVersion("1.0")]
-    public class CountriesController : ControllerBase
+    [Route("api/countries")]
+    [ApiVersion("2.0")]
+    
+    public class CountriesV20Controller : ControllerBase
     {
         // IMapper service 
         private readonly IMapper _mapper;
         private readonly ICountriesRepository _countriesRepository;
-        private readonly ILogger<CountriesController> _logger;
+        private readonly ILogger<CountriesV20Controller> _logger;
 
         // countriesRepository Injection from App 
-        public CountriesController(IMapper mapper, ICountriesRepository countriesRepository, ILogger<CountriesController> logger)
+        public CountriesV20Controller(IMapper mapper, ICountriesRepository countriesRepository, ILogger<CountriesV20Controller> logger)
         {
             this._mapper = mapper;
             _countriesRepository = countriesRepository;
@@ -30,7 +31,7 @@ namespace HotelListing.API.Controllers
         // GET: api/Countries
 
         //Attribut ! pomembno opisuje akcijo na API
-        [MapToApiVersion("1.0")]
+        [MapToApiVersion("2.0")]
         [HttpGet]
         // Vrne ActionResult in objekt IEnumerable<Country>,Metoda GetCountries
         public async Task<ActionResult<IEnumerable<GetCountryDTO>>> GetCountries()
@@ -50,7 +51,7 @@ namespace HotelListing.API.Controllers
 
         // GET: api/Countries/5
         //Attribut ! pomembno opisuje akcijo na API - prejme parameter int
-        [MapToApiVersion("1.0")]
+        [MapToApiVersion("2.0")]
         [HttpGet("{id}")]
         // Vrne ActionResult in objekt <Country>,Metoda GetCountry(id)
         public async Task<ActionResult<CountryDTO>> GetCountry(int id)
@@ -70,7 +71,7 @@ namespace HotelListing.API.Controllers
         }
 
         //Attribut ! pomembno opisuje akcijo na API - prejme parameter int
-        [MapToApiVersion("1.0")]
+        [MapToApiVersion("2.0")]
         [HttpGet("{id}/details/")]
         // Vrne ActionResult in objekt <Country>,Metoda GetCountryDetails(id)
         public async Task<ActionResult<CountryDTO>> GetCountryDetails(int id)
@@ -92,7 +93,7 @@ namespace HotelListing.API.Controllers
 
         // PUT: api/Countries/5
         //Attribut ! pomembno opisuje akcijo na API - prejme parameter int
-        [MapToApiVersion("1.0")]
+        [MapToApiVersion("2.0")]
         [HttpPut("{id}")]
         [Authorize]
         // Vrne ActionResult 
@@ -138,7 +139,7 @@ namespace HotelListing.API.Controllers
 
         // POST: api/Countries
         //Attribut ! pomembno opisuje akcijo na API
-        [MapToApiVersion("1.0")]
+        [MapToApiVersion("2.0")]
         [HttpPost]
         [Authorize]
         // Vrne ActionResult in objekt Country,Metoda PostCountry s parametrom CreateCountryDTO
@@ -160,7 +161,7 @@ namespace HotelListing.API.Controllers
         // DELETE: api/Countries/5
 
         //Attribut ! pomembno opisuje akcijo na API - prejme parameter int
-        [MapToApiVersion("1.0")]
+        [MapToApiVersion("2.0")]
         [HttpDelete("{id}")]
         [Authorize(Roles = "Administrator")]
         // Vrne ActionResult 
