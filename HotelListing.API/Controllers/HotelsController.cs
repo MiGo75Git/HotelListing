@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HotelListing.API.Contracts;
 using HotelListing.API.Data;
+using HotelListing.API.Exceptions;
 using HotelListing.API.Models.Hotel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,26 +31,12 @@ namespace HotelListing.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Hotel>>> GetHotels()
         {
+            _logger.LogInformation($"{nameof(GetHotels)} started.");
+            var hotels = await _hotelsRepository.GetAllAsync();
+            var records = _mapper.Map<List<GetHotelDTO>>(hotels);
 
-            try
-            {
-                _logger.LogInformation($"{nameof(GetHotels)} started.");
-                if (_hotelsRepository == null)
-                {
-                    _logger.LogWarning($"{nameof(GetHotels)} on empty collection.");
-                    return NotFound();
-                }
-                var hotels = await _hotelsRepository.GetAllAsync();
-                var records = _mapper.Map<List<GetHotelDTO>>(hotels);
-                _logger.LogInformation($"{nameof(GetHotels)} succes.");
-                return Ok(records);
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"{nameof(GetHotels)} went wrong with error {ex.Message}.");
-                return Problem($"Something went wrong in the {nameof(GetHotels)}", statusCode: 500);
-            }
+            _logger.LogInformation($"{nameof(GetHotels)} succes.");
+            return Ok(records);
 
         }
 
@@ -58,31 +45,16 @@ namespace HotelListing.API.Controllers
         public async Task<ActionResult<Hotel>> GetHotel(int id)
         {
 
-            try
-            {
-                _logger.LogInformation($"{nameof(GetHotel)} for {id} started.");
-                if (_hotelsRepository == null)
-                {
-                    _logger.LogWarning($"{nameof(GetHotel)} for {id} not found.");
-                    return NotFound();
-                }
-                var hotel = await _hotelsRepository.GetAsync(id);
+            _logger.LogInformation($"{nameof(GetHotel)} for {id} started.");
+            var hotel = await _hotelsRepository.GetAsync(id);
 
-                if (hotel == null)
-                {
-                    _logger.LogWarning($"{nameof(GetHotel)} on empty collection.");
-                    return NotFound();
-                }
-                var hotelDto = _mapper.Map<HotelDTO>(hotel);
-                _logger.LogInformation($"{nameof(GetHotel)} for {id} succes.({hotel.Id} {hotel.Name})");
-                return Ok(hotelDto);
-
-            }
-            catch (Exception ex)
+            if (hotel == null)
             {
-                _logger.LogError($"{nameof(GetHotel)} for {id} went wrong with error {ex.Message}.");
-                return Problem($"Something went wrong in the {nameof(GetHotel)}", statusCode: 500);
+                throw new NotFoundException(nameof(GetHotel),id);
             }
+            var hotelDto = _mapper.Map<HotelDTO>(hotel);
+            _logger.LogInformation($"{nameof(GetHotel)} for {id} succes.({hotel.Id} {hotel.Name})");
+            return Ok(hotelDto);
         }
 
         // PUT: api/Hotels/5
@@ -135,27 +107,12 @@ namespace HotelListing.API.Controllers
         [Authorize(Roles = "User")]
         public async Task<ActionResult<Hotel>> PostHotel(CreateHotelDTO createHotelDTO)
         {
-            try
-            {
-                _logger.LogInformation($"{nameof(PostHotel)} started.");
-                if (_hotelsRepository == null)
-                {
-                    _logger.LogWarning($"{nameof(PostHotel)} went wrong on empty collection.");
-                    return Problem("Entity set 'HotelListingDbContext.Hotels' is null.", statusCode: 500);
-                }
-                var hotel = _mapper.Map<Hotel>(createHotelDTO);
-                await _hotelsRepository.AddAsync(hotel);
+            _logger.LogInformation($"{nameof(PostHotel)} started.");
+            var hotel = _mapper.Map<Hotel>(createHotelDTO);
+            await _hotelsRepository.AddAsync(hotel);
 
-                _logger.LogInformation($"{nameof(PostHotel)} added successfully as id={hotel.Id} Name={hotel.Name}.");
-                return CreatedAtAction("GetHotel", new { id = hotel.Id }, hotel);
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"{nameof(PostHotel)} went wrong with error {ex.Message}.");
-                return Problem($"Something went wrong in the {nameof(PostHotel)}", statusCode: 500);
-            }
-
+            _logger.LogInformation($"{nameof(PostHotel)} added successfully as id={hotel.Id} Name={hotel.Name}.");
+            return CreatedAtAction("GetHotel", new { id = hotel.Id }, hotel);
         }
 
         // DELETE: api/Hotels/5
@@ -163,33 +120,16 @@ namespace HotelListing.API.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteHotel(int id)
         {
-            try
-            {
-                _logger.LogInformation($"{nameof(DeleteHotel)} started.");
-                if (_hotelsRepository == null)
-                {
-                    _logger.LogWarning($"{nameof(DeleteHotel)} went wrong on empty collection.");
-                    return NotFound();
-                }
-                var hotel = await _hotelsRepository.GetAsync(id);
-                if (hotel == null)
-                {
-                    _logger.LogWarning($"{nameof(DeleteHotel)} with id={id} not found.");
-                    return NotFound();
-                }
-
-                await _hotelsRepository.DeleteAsync(hotel.Id);
-                _logger.LogInformation($"{nameof(DeleteHotel)} succes deleting Hotel with id={id}.");
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-
-                _logger.LogError($"{nameof(DeleteHotel)} with id={id} went wrong with error {ex.Message}.");
-                return Problem($"Something went wrong in the {nameof(DeleteHotel)}", statusCode: 500);
+            _logger.LogInformation($"{nameof(DeleteHotel)} started.");
+            var hotel = await _hotelsRepository.GetAsync(id);
+            if (hotel == null)
+            {                
+                throw new NotFoundException(nameof(DeleteHotel), id);
             }
 
-
+            await _hotelsRepository.DeleteAsync(hotel.Id);
+            _logger.LogInformation($"{nameof(DeleteHotel)} succes deleting Hotel with id={id}.");
+            return NoContent();
         }
 
         private async Task<bool> HotelExists(int id)
