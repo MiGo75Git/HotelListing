@@ -1,13 +1,11 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using HotelListing.API.Core.Contracts;
+using HotelListing.API.Core.Exceptions;
+using HotelListing.API.Core.Models.Country;
 using HotelListing.API.Data;
-using HotelListing.API.Core.Repository;
-using Microsoft.EntityFrameworkCore;
-
-using HotelListing.API.Core.Contracts;
-using HotelListing.API.Core.Models;
-using Microsoft.EntityFrameworkCore;
 using HotelListing.API.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.API.Core.Repository
 {
@@ -24,9 +22,10 @@ namespace HotelListing.API.Core.Repository
             _mapper = mapper;
         }
 
-        public async Task<Country> GetDetails(int id)
+        public async Task<CountryDTO> GetDetails(int id)
         {
             return await _context.Countries.Include(q => q.Hotels)
+                .ProjectTo<CountryDTO>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync(q => q.Id == id);
         }
     }

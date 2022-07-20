@@ -2,3 +2,8 @@
 /HotelListing.API/obj
 /HotelListing.API/bin/Debug/net6.0
 /HotelListing.API/logs
+/HotelListing.API.Core/obj
+/HotelListing.API.Core/bin/Debug/net6.0
+/HotelListing.Data/bin/Debug/net6.0
+/HotelListing.Data/obj/Debug/net6.0
+/HotelListing.Data/obj
