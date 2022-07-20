@@ -6,6 +6,7 @@ using HotelListing.API.Models;
 using HotelListing.API.Models.Hotel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.API.Controllers
@@ -30,11 +31,12 @@ namespace HotelListing.API.Controllers
 
         // GET: api/Hotels
         [HttpGet("GetAll")]
+        [EnableQuery()]        
         public async Task<ActionResult<IEnumerable<Hotel>>> GetHotels()
         {
             _logger.LogInformation($"{nameof(GetHotels)} started.");
-            var hotels = await _hotelsRepository.GetAllAsync();
-            var records = _mapper.Map<List<GetHotelDTO>>(hotels);
+            var records = await _hotelsRepository.GetAllAsync();
+            // var records = _mapper.Map<List<GetHotelDTO>>(hotels);
 
             _logger.LogInformation($"{nameof(GetHotels)} succes.");
             return Ok(records);
@@ -46,7 +48,7 @@ namespace HotelListing.API.Controllers
         public async Task<ActionResult<PagedResult<HotelDTO>>> GetPagedHotels([FromQuery] QueryParameters queryParameters)
         {
             _logger.LogInformation($"{nameof(GetPagedHotels)} started.");
-            var pagedHotelsResult = await _hotelsRepository.GetAllAsync<GetHotelDTO>(queryParameters);
+            var pagedHotelsResult = await _hotelsRepository.GetAllAsync<HotelDTO>(queryParameters);
             // ta metoda ima že v generic mapiranje 
             // var records = _mapper.Map<List<GetHotelDTO>>(hotels);
             _logger.LogInformation($"{nameof(GetPagedHotels)} succes. PageNumber:{queryParameters.PageNumber} StartIndex:{queryParameters.StartIndex} PageSize:{queryParameters.PageSize} ");

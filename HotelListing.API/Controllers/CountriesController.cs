@@ -6,6 +6,7 @@ using HotelListing.API.Models;
 using HotelListing.API.Models.Country;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.API.Controllers
@@ -32,6 +33,7 @@ namespace HotelListing.API.Controllers
         //Attribut ! pomembno opisuje akcijo na API
         [MapToApiVersion("1.0")]
         [HttpGet("GetAll")]
+        [EnableQuery()]
         // Vrne ActionResult in objekt IEnumerable<Country>,Metoda GetCountries
         public async Task<ActionResult<IEnumerable<GetCountryDTO>>> GetCountries()
         {
