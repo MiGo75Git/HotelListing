@@ -1,7 +1,6 @@
-﻿using HotelListing.API.Contracts;
-using HotelListing.API.Models.User;
+﻿using HotelListing.API.Core.Contracts;
+using HotelListing.API.Core.Models.User;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelListing.API.Controllers
