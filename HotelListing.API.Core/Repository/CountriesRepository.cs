@@ -22,11 +22,17 @@ namespace HotelListing.API.Core.Repository
             _mapper = mapper;
         }
 
-        public async Task<CountryDTO> GetDetails(int id)
+        public async Task<CountryDTO> GetDetails(int? id)
         {
-            return await _context.Countries.Include(q => q.Hotels)
+            var country = await _context.Countries.Include(q => q.Hotels)
                 .ProjectTo<CountryDTO>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync(q => q.Id == id);
+
+            if (country is null)
+            {
+                throw new NotFoundException(typeof(CountryDTO).Name, id.HasValue ? id : "No Key Provided");
+            }
+            return country;
         }
     }
 }
