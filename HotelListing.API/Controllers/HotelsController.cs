@@ -2,6 +2,7 @@
 using HotelListing.API.Contracts;
 using HotelListing.API.Data;
 using HotelListing.API.Exceptions;
+using HotelListing.API.Models;
 using HotelListing.API.Models.Hotel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ namespace HotelListing.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class HotelsController : ControllerBase
     {
         // IMapper service 
@@ -28,7 +29,7 @@ namespace HotelListing.API.Controllers
         }
 
         // GET: api/Hotels
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<ActionResult<IEnumerable<Hotel>>> GetHotels()
         {
             _logger.LogInformation($"{nameof(GetHotels)} started.");
@@ -38,6 +39,18 @@ namespace HotelListing.API.Controllers
             _logger.LogInformation($"{nameof(GetHotels)} succes.");
             return Ok(records);
 
+        }
+
+        // GET: api/Hotels/?StartIndex=0&pageSize=5&pageNumber=3
+        [HttpGet]
+        public async Task<ActionResult<PagedResult<HotelDTO>>> GetPagedHotels([FromQuery] QueryParameters queryParameters)
+        {
+            _logger.LogInformation($"{nameof(GetPagedHotels)} started.");
+            var pagedHotelsResult = await _hotelsRepository.GetAllAsync<GetHotelDTO>(queryParameters);
+            // ta metoda ima že v generic mapiranje 
+            // var records = _mapper.Map<List<GetHotelDTO>>(hotels);
+            _logger.LogInformation($"{nameof(GetPagedHotels)} succes. PageNumber:{queryParameters.PageNumber} StartIndex:{queryParameters.StartIndex} PageSize:{queryParameters.PageSize} ");
+            return Ok(pagedHotelsResult);
         }
 
         // GET: api/Hotels/5

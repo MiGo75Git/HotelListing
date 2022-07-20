@@ -2,6 +2,7 @@
 using HotelListing.API.Contracts;
 using HotelListing.API.Data;
 using HotelListing.API.Exceptions;
+using HotelListing.API.Models;
 using HotelListing.API.Models.Country;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,10 +29,9 @@ namespace HotelListing.API.Controllers
         }
 
         // GET: api/Countries
-
         //Attribut ! pomembno opisuje akcijo na API
         [MapToApiVersion("1.0")]
-        [HttpGet]
+        [HttpGet("GetAll")]
         // Vrne ActionResult in objekt IEnumerable<Country>,Metoda GetCountries
         public async Task<ActionResult<IEnumerable<GetCountryDTO>>> GetCountries()
         {
@@ -48,6 +48,24 @@ namespace HotelListing.API.Controllers
             return Ok(records);
         }
 
+
+        // GET: api/Countries/?StartIndex=0&pageSize=5&pageNumber=3
+        //Attribut ! pomembno opisuje akcijo na API
+        [MapToApiVersion("1.1")]
+        [HttpGet]
+        // Vrne ActionResult in objekt IEnumerable<Country>,Metoda GetCountries
+        public async Task<ActionResult<PagedResult<GetCountryDTO>>> GetPagedCountries([FromQuery] QueryParameters queryParameters)
+        {
+            _logger.LogInformation($"{nameof(GetPagedCountries)} started.");
+
+            var pagedCountriesResult = await _countriesRepository.GetAllAsync<GetCountryDTO>(queryParameters);
+
+            _logger.LogInformation($"{nameof(GetPagedCountries)} succes. PageNumber:{queryParameters.PageNumber} StartIndex:{queryParameters.StartIndex} PageSize:{queryParameters.PageSize} ");
+
+            return Ok(pagedCountriesResult);
+        }
+
+
         // GET: api/Countries/5
         //Attribut ! pomembno opisuje akcijo na API - prejme parameter int
         [MapToApiVersion("1.0")]
@@ -62,11 +80,11 @@ namespace HotelListing.API.Controllers
             {
                 throw new NotFoundException(nameof(GetCountry), id);
             }
-
-            var CountryDto = _mapper.Map<CountryDTO>(country);
+            // eliminate this because _countriesRepository.GetAsync(id) is doing that allready from now 
+            // var CountryDto = _mapper.Map<CountryDTO>(country);
 
             _logger.LogInformation($"{nameof(GetCountry)} with id={id} succes.");
-            return Ok(CountryDto);
+            return Ok(country);
         }
 
         //Attribut ! pomembno opisuje akcijo na API - prejme parameter int
@@ -82,11 +100,11 @@ namespace HotelListing.API.Controllers
             {
                 throw new NotFoundException(nameof(GetCountryDetails), id);
             }
-
-            var CountryDto = _mapper.Map<CountryDTO>(country);
+            // eliminate this because _countriesRepository.GetAsync(id) is doing that allready from now 
+            // var CountryDto = _mapper.Map<CountryDTO>(country);
 
             _logger.LogInformation($"{nameof(GetCountryDetails)}  with id={id} succes.");
-            return Ok(CountryDto);
+            return Ok(country);
 
         }
 
@@ -127,7 +145,7 @@ namespace HotelListing.API.Controllers
                 }
                 else
                 {
-                    throw new BadRequestException($"Something went wrong in the {nameof(PutCountry)}");
+                    throw new BadRequestException($"Something went wrong in the {nameof(PutCountry)}: {exc.Message}");
 
                 }
             }
